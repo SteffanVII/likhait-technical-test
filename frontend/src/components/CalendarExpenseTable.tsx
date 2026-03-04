@@ -125,6 +125,7 @@ export function CalendarExpenseTable({
             <th style={thStyle}>Date</th>
             <th style={thStyle}>Description</th>
             <th style={thStyle}>Category</th>
+            <th style={thStyle}>Payer</th>
             <th style={thStyle}>Amount</th>
             <th style={{ ...thStyle, textAlign: "center" }}>Actions</th>
           </tr>
@@ -146,6 +147,7 @@ export function CalendarExpenseTable({
                   <span>{expense.category}</span>
                 </span>
               </td>
+              <td style={tdStyle}>{expense.payer_name}</td>
               <td style={{ ...tdStyle, textAlign: "left", fontWeight: 600 }}>
                 {formatCurrency(expense.amount)}
               </td>
