@@ -193,6 +193,7 @@ export function CalendarExpenseTable({
               description: editingExpense.description,
               category: editingExpense.category,
               date: formatDate(new Date(editingExpense.date)),
+              payer_name: editingExpense.payer_name
             }}
             onSubmit={handleUpdate}
             onCancel={() => {
