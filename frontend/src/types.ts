@@ -17,6 +17,7 @@ export interface ExpenseFormData {
   description: string;
   category: string;
   date: string;
+  payer_name: string;
 }
 
 export interface MonthlySummary {
