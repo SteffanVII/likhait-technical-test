@@ -6,20 +6,20 @@ Category.destroy_all
 # Create categories
 puts "Creating categories..."
 categories = [
-  'Food',
-  'Transportation',
-  'Shopping',
-  'Entertainment',
-  'Bills',
-  'Healthcare',
-  'Education',
-  'Travel',
-  'Personal',
-  'Other'
+  { name: 'Food', emoji: '🍎' },
+  { name: 'Transportation', emoji: '🚗' },
+  { name: 'Shopping', emoji: '🛍️' },
+  { name: 'Entertainment', emoji: '🎬' },
+  { name: 'Bills', emoji: '💸' },
+  { name: 'Healthcare', emoji: '🏥' },
+  { name: 'Education', emoji: '📚' },
+  { name: 'Travel', emoji: '✈️' },
+  { name: 'Personal', emoji: '👤' },
+  { name: 'Other', emoji: '📦' }
 ]
 
-created_categories = categories.map do |cat_name|
-  Category.create!(name: cat_name)
+created_categories = categories.map do |cat_data|
+  Category.create!(cat_data)
 end
 
 puts "Created #{created_categories.count} categories"

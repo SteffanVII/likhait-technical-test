@@ -6,7 +6,10 @@ export interface Expense {
   id: number;
   amount: number;
   description: string;
-  category: string;
+  category: {
+    name: string,
+    emoji: string | null
+  };
   date: string;
   payer_name: string;
   created_at: string;
@@ -19,6 +22,17 @@ export interface ExpenseFormData {
   category: string;
   date: string;
   payer_name: string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  emoji: string;
+}
+
+export interface CategoryFormData {
+  name: string;
+  emoji?: string;
 }
 
 export interface MonthlySummary {

@@ -9,6 +9,7 @@ interface SelectBoxProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
   fullWidth?: boolean;
+  description? : string;
   options: Array<{ value: string; label: string }>;
 }
 
@@ -16,6 +17,7 @@ export function SelectBox({
   label,
   error,
   fullWidth = false,
+  description,
   options,
   ...props
 }: SelectBoxProps) {
@@ -50,6 +52,11 @@ export function SelectBox({
     marginTop: "-0.25rem",
   };
 
+  const descriptionStyle: React.CSSProperties = {
+    fontSize: "0.875rem",
+    color: COLORS.text.primary,
+  }
+
   return (
     <div style={containerStyle}>
       {label && <label style={labelStyle}>{label}</label>}
@@ -61,6 +68,7 @@ export function SelectBox({
           </option>
         ))}
       </select>
+      {description && <span style={descriptionStyle} >{description}</span>}
       {error && <span style={errorStyle}>{error}</span>}
     </div>
   );

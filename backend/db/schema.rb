@@ -13,6 +13,7 @@
 ActiveRecord::Schema[7.2].define(version: 2026_02_18_000002) do
   create_table "categories", id: :integer, charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "name", limit: 100, null: false
+    t.string "emoji", limit: 32
     t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }
     t.timestamp "updated_at", default: -> { "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" }
     t.index ["name"], name: "idx_name"

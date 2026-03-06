@@ -53,7 +53,10 @@ class Api::ExpensesController < ApplicationController
       description: expense.description,
       amount: expense.amount.to_f,
       payer_name: expense.payer_name,
-      category: expense.category.name,
+      category: {
+        name: expense.category.name,
+        emoji: expense.category.emoji
+      },
       date: expense.date,
       created_at: expense.created_at,
       updated_at: expense.updated_at
