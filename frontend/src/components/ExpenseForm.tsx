@@ -2,113 +2,181 @@
  * Form component for adding/editing expenses
  */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { ExpenseFormData } from "../types";
-import { EXPENSE_CATEGORIES } from "../constants/categories";
 import { TextField, SelectBox, Button } from "../vibes";
-import { useExpenseForm } from "../hooks/useExpenseForm";
+import { expenseFormSchema, useExpenseForm } from "../hooks/useExpenseForm";
+import { useCreateExpense, useFetchCategories, useUpdateExpense } from "../services/api";
+import z from "zod";
+import { formatDate } from "../utils/expenseUtils";
 
 interface ExpenseFormProps {
-  initialData?: Partial<ExpenseFormData>;
-  onSubmit: (data: ExpenseFormData) => Promise<void>;
-  onCancel?: () => void;
-  submitLabel?: string;
+    initialData?: Partial<ExpenseFormData>;
+    onSuccess?: () => void;
+    onCancel?: () => void;
+    submitLabel?: string;
+    updatingId?: number;
 }
 
 export function ExpenseForm({
-  initialData,
-  onSubmit,
-  onCancel,
-  submitLabel = "Add Expense",
+    initialData,
+    onSuccess,
+    onCancel,
+    submitLabel = "Add Expense",
+    updatingId
 }: ExpenseFormProps) {
-  const { formData, errors, isSubmitting, handleChange, handleSubmit } =
-    useExpenseForm({
-      initialData,
-      onSubmit,
-    });
 
-  const formStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  };
+    const {
+        data: categories,
+        isLoading: isCategoriesLoading
+    } = useFetchCategories()
 
-  const buttonGroupStyle: React.CSSProperties = {
-    display: "flex",
-    gap: "0.5rem",
-    marginTop: "0.5rem",
-  };
+    const {
+        mutateAsync: createExpenseTrigger,
+        isPending: isCreatingExpense
+    } = useCreateExpense({
+        onSuccess: () => {
+            onSuccess?.()
+            form.reset()
+        }
+    })
 
-  const categoryOptions = EXPENSE_CATEGORIES.map((category) => ({
-    value: category,
-    label: category,
-  }));
+    const {
+        mutateAsync: updateExpenseTrigger,
+        isPending: isUpdatingExpense
+    } = useUpdateExpense({
+        onSuccess: () => {
+            onSuccess?.()
+        }
+    })
 
-  return (
-    <form onSubmit={handleSubmit} style={formStyle}>
-      <TextField
-        label="Amount"
-        type="number"
-        step="0.01"
-        placeholder="0.00"
-        value={formData.amount}
-        onChange={(e) => handleChange("amount", e.target.value)}
-        error={errors.amount}
-        fullWidth
-        required
-      />
+    const form = useExpenseForm({ initialData : {
+        ...initialData,
+        category : !!updatingId ? categories?.find((category) => category.name === initialData?.category)?.id.toString() : ""
+    } });
 
-      <TextField
-        label="Description"
-        type="text"
-        placeholder="Enter description"
-        value={formData.description}
-        onChange={(e) => handleChange("description", e.target.value)}
-        error={errors.description}
-        fullWidth
-        required
-      />
+    const onSubmit = async (data: z.infer<typeof expenseFormSchema>) => {
+        if (!updatingId) {
+            await createExpenseTrigger({
+                ...data,
+                date: data.date.toString(),
+                amount: data.amount.toString(),
+            })
+        } else {
+            await updateExpenseTrigger({
+                id : updatingId,
+                data : {
+                    ...data,
+                    date: data.date.toString(),
+                    amount: data.amount.toString(),
+                }
+            })
+        }
+    }
 
-      <SelectBox
-        label="Category"
-        options={categoryOptions}
-        value={formData.category}
-        onChange={(e) => handleChange("category", e.target.value)}
-        error={errors.category}
-        fullWidth
-        required
-      />
+    const formStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        gap: "1rem",
+    };
 
-      <TextField
-        label="Date"
-        type="date"
-        value={formData.date}
-        onChange={(e) => handleChange("date", e.target.value)}
-        error={errors.date}
-        fullWidth
-        required
-      />
+    const buttonGroupStyle: React.CSSProperties = {
+        display: "flex",
+        gap: "0.5rem",
+        marginTop: "0.5rem",
+    };
 
-      <div style={buttonGroupStyle}>
-        <Button
-          type="submit"
-          variant="primary"
-          disabled={isSubmitting}
-          fullWidth
-        >
-          {isSubmitting ? "Submitting..." : submitLabel}
-        </Button>
-        {onCancel && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-        )}
-      </div>
-    </form>
-  );
+    useEffect(() => {
+        if (!!updatingId) {
+            form.setValue("category", categories?.find((category) => category.name === initialData?.category)?.id.toString() || "")
+        }
+    }, [updatingId, categories])
+
+    return (
+        <form onSubmit={form.handleSubmit(onSubmit)} style={formStyle} noValidate>
+            <TextField
+                label="Amount"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={form.watch("amount")}
+                onChange={(e) => form.setValue("amount", Number(e.target.value))}
+                error={form.formState.errors.amount?.message}
+                disabled={isCreatingExpense || isUpdatingExpense}
+                fullWidth
+                required
+            />
+
+            <TextField
+                label="Description"
+                type="text"
+                placeholder="Enter description"
+                value={form.watch("description")}
+                onChange={(e) => form.setValue("description", e.target.value)}
+                error={form.formState.errors.description?.message}
+                disabled={isCreatingExpense || isUpdatingExpense}
+                fullWidth
+                required
+            />
+
+            <SelectBox
+                label="Category"
+                options={(categories || []).map((category) => ({
+                    value: category.id.toString(),
+                    label: `${category.emoji && `${category.emoji} `}${category.name}`,
+                }))}
+                value={form.watch("category")}
+                onChange={(e) => form.setValue("category", e.target.value)}
+                error={form.formState.errors.category?.message}
+                fullWidth
+                required
+                disabled={isCategoriesLoading || isCreatingExpense || isUpdatingExpense}
+            />
+
+            <TextField
+                label="Date"
+                type="date"
+                value={formatDate(form.watch("date"))}
+                max={formatDate(new Date())}
+                onChange={(e) => form.setValue("date", new Date(e.target.value))}
+                error={form.formState.errors.date?.message}
+                disabled={isCreatingExpense || isUpdatingExpense}
+                fullWidth
+                required
+            />
+
+            <TextField
+                label="Payer Name"
+                type="text"
+                placeholder="Enter payer name"
+                value={form.watch("payer_name")}
+                onChange={(e) => form.setValue("payer_name", e.target.value)}
+                error={form.formState.errors.payer_name?.message}
+                disabled={isCreatingExpense || isUpdatingExpense}
+                fullWidth
+                required
+            />
+
+            <div style={buttonGroupStyle}>
+                <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={isCreatingExpense || isUpdatingExpense}
+                    fullWidth
+                >
+                    {isCreatingExpense || isUpdatingExpense ? "Submitting..." : submitLabel}
+                </Button>
+                {onCancel && (
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={onCancel}
+                        disabled={isCreatingExpense || isUpdatingExpense}
+                    >
+                        Cancel
+                    </Button>
+                )}
+            </div>
+        </form>
+    );
 }

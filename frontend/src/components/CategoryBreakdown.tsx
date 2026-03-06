@@ -1,9 +1,8 @@
 import React from "react";
-import { CATEGORY_EMOJIS } from "../constants/categoryEmojis";
 import { COLORS } from "../constants/colors";
 
 interface CategoryData {
-  category: string;
+  category: { name: string, emoji: string | null };
   amount: number;
   count: number;
 }
@@ -184,7 +183,7 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
         <div style={listStyle}>
           {categories.map((category) => (
             <div
-              key={category.category}
+              key={category.category.name}
               style={itemStyle}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = COLORS.secondary.s02;
@@ -200,10 +199,10 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
             >
               <div style={itemInfoStyle}>
                 <span style={itemIconStyle}>
-                  {CATEGORY_EMOJIS[category.category] || "📊"}
+                  {category.category.emoji || "📊"}
                 </span>
                 <div style={itemDetailsStyle}>
-                  <div style={itemNameStyle}>{category.category}</div>
+                  <div style={itemNameStyle}>{category.category.name}</div>
                   <div style={itemCountStyle}>
                     {category.count} transaction
                     {category.count !== 1 ? "s" : ""}
