@@ -4,6 +4,7 @@ import HistoryPage from "./pages/HistoryPage";
 import { COLORS } from "./constants/colors";
 
 function App() {
+
   const [currentPage, setCurrentPage] = useState("history");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
