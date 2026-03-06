@@ -146,6 +146,7 @@ while current_date <= end_date
         amount: amount,
         category: category,
         date: current_date,
+        payer_name: Faker::Name.name,
         created_at: current_date,
         updated_at: current_date
       )

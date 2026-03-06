@@ -59,6 +59,7 @@ export async function createExpense(data: ExpenseFormData): Promise<Expense> {
     amount: data.amount,
     category_id: category?.id,
     date: data.date,
+    payer_name: data.payer_name
   };
 
   const response = await fetch(`${API_BASE_URL}/expenses`, {

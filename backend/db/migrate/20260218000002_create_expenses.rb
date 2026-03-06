@@ -4,6 +4,7 @@ class CreateExpenses < ActiveRecord::Migration[7.2]
       t.string :description, null: false, limit: 255
       t.decimal :amount, precision: 10, scale: 2, null: false
       t.date :date, null: false
+      t.string :payer_name, null: false, limit: 100
       t.references :category, null: false, foreign_key: true, index: true
 
       t.timestamps
