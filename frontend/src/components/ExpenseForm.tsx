@@ -8,6 +8,7 @@ import { TextField, SelectBox, Button } from "../vibes";
 import { expenseFormSchema, useExpenseForm } from "../hooks/useExpenseForm";
 import { useCreateExpense, useFetchCategories, useUpdateExpense } from "../services/api";
 import z from "zod";
+import { formatDate } from "../utils/expenseUtils";
 
 interface ExpenseFormProps {
     initialData?: Partial<ExpenseFormData>;
@@ -58,6 +59,7 @@ export function ExpenseForm({
         if (!updatingId) {
             await createExpenseTrigger({
                 ...data,
+                date: data.date.toString(),
                 amount: data.amount.toString(),
             })
         } else {
@@ -65,6 +67,7 @@ export function ExpenseForm({
                 id : updatingId,
                 data : {
                     ...data,
+                    date: data.date.toString(),
                     amount: data.amount.toString(),
                 }
             })
@@ -90,7 +93,7 @@ export function ExpenseForm({
     }, [updatingId, categories])
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} style={formStyle}>
+        <form onSubmit={form.handleSubmit(onSubmit)} style={formStyle} noValidate>
             <TextField
                 label="Amount"
                 type="number"
@@ -133,8 +136,9 @@ export function ExpenseForm({
             <TextField
                 label="Date"
                 type="date"
-                value={form.watch("date")}
-                onChange={(e) => form.setValue("date", e.target.value)}
+                value={formatDate(form.watch("date"))}
+                max={formatDate(new Date())}
+                onChange={(e) => form.setValue("date", new Date(e.target.value))}
                 error={form.formState.errors.date?.message}
                 disabled={isCreatingExpense || isUpdatingExpense}
                 fullWidth

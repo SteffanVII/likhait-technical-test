@@ -3,7 +3,6 @@
  */
 
 import { ExpenseFormData } from "../types";
-import { formatDate } from "../utils/expenseUtils";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +15,11 @@ export const expenseFormSchema = z.object({
   amount : z.number().min(1, "Amount must be greater than 0").max(1000000, "Amount must be less than 1,000,000"),
   description : z.string().min(1, "Description is required"),
   category : z.string().min(1, "Category is required"),
-  date : z.string().min(1, "Date is required"),
+  date : z.date().refine((val) => {
+    const limit = new Date();
+    limit.setHours(23, 59, 59, 999);
+    return val <= limit;
+  }, "You can only record expenses that have already occurred"),
   payer_name : z.string().min(1, "Payer name is required"),
 })
 
@@ -28,7 +31,7 @@ export function useExpenseForm({ initialData }: UseExpenseFormProps) {
       amount : Number(initialData?.amount) || 0,
       description : initialData?.description || "",
       category : initialData?.category || "",
-      date : initialData?.date || formatDate(new Date()),
+      date : initialData?.date ? new Date(initialData?. date) : new Date(),
       payer_name : initialData?.payer_name || "",
     }
   })
