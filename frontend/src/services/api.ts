@@ -179,15 +179,19 @@ export const useUpdateExpense = (options?: UseUpdateExpenseMutationOptions) => {
   return useMutation<Expense, Error, {id : number, data : Partial<ExpenseFormData>}>({
     ...options,
     mutationFn: async ({id, data}) => {
+      const body = {
+        amount : data.amount,
+        description : data.description,
+        date : data.date,
+        category_id : data.category,
+        payer_name : data.payer_name
+      }
       const response = await fetch(`${API_BASE_URL}/expenses/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ expense: {
-          ...data,
-          category_id : data.category
-        } }),
+        body: JSON.stringify({ expense: body }),
       });
 
       if (!response.ok) {
